@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class JClientHandler implements Runnable
 {
 	static String BUZZ_IN_STR = "BUZZ_IN";
-	int numPlayers = 2;
+	int numPlayers = 3;
 	private Socket connectionSock = null;
 	private ArrayList<Socket> socketList;
 	boolean[] sent;
@@ -47,7 +47,40 @@ public class JClientHandler implements Runnable
 				if (clientText != null && !clientText.contains("buzzed in."))
 				{
 					System.out.println("Received: " + clientText);
-					System.out.println("Player Count: " + socketList.size() + " / " + numPlayers);
+					
+					if(!sent[0] && !sent[1] && !sent[2])
+					{
+						System.out.println("Player Count: " + socketList.size() + " / " + numPlayers);
+					}
+					else
+					{
+						if(clientText.equals("purple"))
+						{
+							System.out.println("Correct! :)");
+							
+							for (int i = 0; i < socketList.size(); ++i)
+							{
+								if(socketList.size() == numPlayers)
+								{
+									//DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
+									//clientOutput.writeBytes(clientText + "\n");
+								}
+							}
+						}
+						else
+						{
+							System.out.println("Incorrect :(");
+							
+							for (int i = 0; i < socketList.size(); ++i)
+							{
+								if(socketList.size() == numPlayers)
+								{
+									//DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
+									//clientOutput.writeBytes(clientText + "\n");
+								}
+							}
+						}
+					}
 					// Turn around and output this data
 					// to all other clients except the one
 					// that sent us this information

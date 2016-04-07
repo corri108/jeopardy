@@ -27,7 +27,7 @@ public class JServer
 	private ArrayList<Socket> socketList;
 	static String BUZZ_IN_STR = "BUZZ_IN";
 	static int state = 0;//0 for people logging in, 1 for sending answer, 2 for listening for buzz
-	static int num_contestants = 2;
+	static int num_contestants = 3;
 	
 	public JServer()
 	{

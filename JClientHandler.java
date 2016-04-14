@@ -16,19 +16,32 @@ import java.util.ArrayList;
 
 public class JClientHandler implements Runnable
 {
-	static String BUZZ_IN_STR = "BUZZ_IN";
+
 	int numPlayers = 3;
 	private Socket connectionSock = null;
 	private ArrayList<Socket> socketList;
 	boolean[] sent;
-	boolean[] buzzed;
+	String[] buzzed;
+	String[] players;
+	int currentBuzzIndex = 0;
+	int buzzedFilled = 0;
+	boolean gameStarted = false;
 
 	JClientHandler(Socket sock, ArrayList<Socket> socketList)
 	{
 		this.connectionSock = sock;
 		this.socketList = socketList;	// Keep reference to master list
 		sent = new boolean[numPlayers];
-		buzzed = new boolean[numPlayers];
+		buzzed = new String[numPlayers];
+		players = new String[numPlayers];
+		resetBuzzOrder();
+	}
+
+	//reset the order that people buzz in
+	void resetBuzzOrder()
+	{
+		currentBuzzIndex = 0;
+		buzzedFilled = 0;
 	}
 
 	public void run()
@@ -48,11 +61,22 @@ public class JClientHandler implements Runnable
 				{
 					System.out.println("Received: " + clientText);
 					
-					if(!sent[0] && !sent[1] && !sent[2])
+					if(!sent[0] || !sent[1] || !sent[2])
 					{
 						System.out.println("Player Count: " + socketList.size() + " / " + numPlayers);
+
+						// for loop goes through on each player's connection.
+						for (int i = 0; i < socketList.size(); ++i)
+						{
+							if(!sent[i])//for sending names
+							{
+								sent[i] = true;
+								players[i] = clientText;
+							}
+						}
+
 					}
-					else
+					else if(gameStarted)
 					{
 						if(clientText.equals("purple"))
 						{
@@ -62,10 +86,12 @@ public class JClientHandler implements Runnable
 							{
 								if(socketList.size() == numPlayers)
 								{
-									//DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
-									//clientOutput.writeBytes(clientText + "\n");
+									DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
+									clientOutput.writeBytes(buzzed[currentBuzzIndex] + " is correct!" + "\n");
 								}
 							}
+
+							resetBuzzOrder();
 						}
 						else
 						{
@@ -75,30 +101,48 @@ public class JClientHandler implements Runnable
 							{
 								if(socketList.size() == numPlayers)
 								{
-									//DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
-									//clientOutput.writeBytes(clientText + "\n");
+									DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
+									clientOutput.writeBytes(buzzed[currentBuzzIndex] + " is incorrect!" + "\n");
+
+									if(currentBuzzIndex != 2)
+									{
+										currentBuzzIndex++;
+									}
+									else
+									{
+										resetBuzzOrder();
+									}
 								}
 							}
 						}
 					}
-					// Turn around and output this data
-					// to all other clients except the one
-					// that sent us this information
-					for (int i = 0; i < socketList.size(); ++i)
+					if(sent[0] && sent[1] && sent[2] && !gameStarted)
 					{
-						if(socketList.size() == numPlayers && !sent[i])
+						for (int i = 0; i < 3; ++i)
 						{
 							DataOutputStream clientOutput = new DataOutputStream(this.socketList.get(i).getOutputStream());
-							clientOutput.writeBytes(clientText + "\n");
-							sent[i] = true;
+							clientOutput.writeBytes(" " + "\n");
+							clientOutput.writeBytes("GAME_READY" + "\n");
 						}
+						
+						gameStarted = true;
 					}
+
 					
 					clientInput = new BufferedReader(new InputStreamReader(connectionSock.getInputStream()));
 				}
 				else if (clientText != null && clientText.contains("buzzed in."))//someone has buzzed in
 				{
-					System.out.println(clientText);
+					System.out.println(clientText);//prints serverOutput.writeBytes(name + " buzzed in." + "\n")
+
+					for(int i = 0; i < 3; ++i)
+					{
+						if(clientText.contains(players[i]))
+						{
+							buzzed[buzzedFilled] = players[i];
+							buzzedFilled++;
+						}
+					}
 					
 					for (int i = 0; i < socketList.size(); ++i)
 					{

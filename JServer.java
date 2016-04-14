@@ -75,23 +75,17 @@ public class JServer
 					//System.out.println("Total number of contestants reached. The game will begin.");
 					
 					for(int i = 0; i < socketList.size(); ++i)
-					{
-						//JClientHandler handler = new JClientHandler(socketList.get(i), this.socketList);
-						//Thread theThread = new Thread(handler);
-						//theThread.start();
-						
+					{	
 						//DataOutputStream sends to client
 						DataOutputStream out = new DataOutputStream(socketList.get(i).getOutputStream());
-						out.writeBytes("answer: What do the colors blue and red create?");
+						out.writeBytes("This TCP protocol requires two separate connections.");
 					}
 					
 					state = 2;//listen for an answer
 				}
 				else if(state == 2)
 				{
-					//listening for a buzz
-					//DataOutputStream out = new DataOutputStream(socketList.get(i).getOutputStream());
-					//out.writeBytes("answer: What do the colors blue and red create?");
+
 				}
 			}
 			// Will never get here, but if the above loop is given

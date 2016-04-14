@@ -25,7 +25,7 @@ import java.util.Scanner;
 
 public class JClient
 {
-	static String BUZZ_IN_STR = "BUZZ_IN";
+
 	public static void main(String[] args)
 	{
 		try
@@ -52,19 +52,23 @@ public class JClient
 			// could easily be added.
 			Scanner keyboard = new Scanner(System.in);
 
-			System.out.println("Enter name: ");
+			System.out.print("Enter name: ");
 			String name = keyboard.nextLine();
 			serverOutput.writeBytes(name + "\n");
-			state = 1;
+			state = 0;
 
 			while (true)
 			{
-				if(state == 0)//logging in (typing in name)
+				if(state == 0)//waiting for everyone to connect
 				{
-					//String data = keyboard.nextLine();
-					//serverOutput.writeBytes(data + "\n");
-					//state = 1;
+					//checks to see if everyone has connected before proceeding
+					if(listener.everyoneReady)
+					{
+						state = 1;
+					}
 				}
+
+
 				else if (state == 1)//buzzing in
 				{
 					serverOutput = new DataOutputStream(connectionSock.getOutputStream());
@@ -72,12 +76,16 @@ public class JClient
 					serverOutput.writeBytes(name + " buzzed in." + "\n");
 					state = 2;
 				}
+				
+
 				else if(state == 2)//guessing (next submission)
 				{
 					String data = keyboard.nextLine();
 					serverOutput.writeBytes(data + "\n");
 					state = 1;
 				}
+
+
 			}
 		}
 		catch (IOException e)

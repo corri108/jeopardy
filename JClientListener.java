@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class JClientListener implements Runnable
 {
 	private Socket connectionSock = null;
+	public boolean everyoneReady = false;
 
 	JClientListener(Socket sock)
 	{
@@ -35,6 +36,11 @@ public class JClientListener implements Runnable
 				if (serverInput != null)
 				{
 					System.out.println(serverText);
+
+					if(serverText.equals("GAME_READY"))
+					{
+						everyoneReady = true;
+					}
 				}
 				else
 				{
